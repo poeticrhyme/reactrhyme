@@ -39,7 +39,7 @@ class App extends Component {
   }
 
   getContent(){
-    var _id, _title, _desc, _article = null;
+    var  _title, _desc, _article = null;
     if(this.state.mode === 'welcome') {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
@@ -59,13 +59,23 @@ class App extends Component {
           newContent.push(
             {id:this.max_content_id, title:_title, desc:_desc}
           );
-          this.setState({contents:newContent})
+          this.setState({
+            contents:newContent,
+            mode:'read',
+            select_content_id:this.max_content_id
+          })
         }.bind(this)} ></CreateContent>
     }else if(this.state.mode === 'update'){
       var _content = this.getReadContent();
       _article = <UpdateContent 
-      onSubmit={function(){
-        
+      onSubmit={function(_id, _title, _desc){
+        console.log(_id, _title, _desc);
+        var _contents = Array.from(this.state.contents);
+        _contents[_id-1] = {id:_id, title:_title, desc:_desc};
+        this.setState({
+          contents:_contents,
+          mode:'read'
+        });
       }.bind(this)} 
       data={_content}></UpdateContent>
     }
@@ -93,9 +103,28 @@ class App extends Component {
           }.bind(this)} ></TOC>
           <Control
           onChangeMode={function(_mode){
-            this.setState({
-              mode : _mode
-            });
+            if(_mode === "delete"){
+              if(window.confirm("really?")){
+                var _contents = Array.from(this.state.contents);
+                var i = 0;
+                while(i<_contents.length){
+                  if(_contents[i].id === this.state.select_content_id){
+                    _contents.splice(i,1);
+                    break;
+                  }
+                  i = i+1;
+                }
+                this.setState({
+                  mode:'welcome',
+                  contents:_contents
+                });
+              }
+            }else{
+              this.setState({
+                mode : _mode
+              });
+            }
+            
           }.bind(this)}></Control>
           {this.getContent()}
       </div>
