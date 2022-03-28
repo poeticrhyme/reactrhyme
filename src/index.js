@@ -4,7 +4,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
+ 
+  // ReactDOM.render : React를 document Dom에 그린다.
+  // React.StrictMode : 없어도 문제가 되지 않지만 애플리케이션 내의 잠재적인 문제를 알아내기 위한 도구
+
+ReactDOM.render(  
   <React.StrictMode>
     <App />
   </React.StrictMode>,
