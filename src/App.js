@@ -2,18 +2,23 @@ import React, { Component } from 'react';
 import './App.css';
 
 import TOC from './components/TOC';
-import Content from './components/Content';
+import ReadContent from './components/ReadContent';
 import Subject from './components/Subject';
+import Control from './components/Control';
+import CreateContent from './components/CreateContent';
+import UpdateContent from './components/UpdateContent';
 
 
 class App extends Component {
   // constructor : 컴포넌트를 실행할때 constructor 함수가 있다면 가장 먼저 실행되어 초기화를 담당
   constructor(props) {
     super(props);
+    this.max_content_id = 3;
     this.state = {
       mode : 'read',
       welcome : {title:"welcome", desc:"Hello, React!!"},
       subject : {title:'WEB', desc:'World Wide Web!'},
+      select_content_id : 3,
       contents : [
         {id:1, title:'HTML', desc:'HTML is for information'},
         {id:2, title:'CSS', desc:'CSS is for design'},
@@ -21,32 +26,78 @@ class App extends Component {
       ]
     }
   }
-  render() {
-    console.log('App render');
-    var _title, _desc = null;
+
+  getReadContent(){
+    var i = 0;
+      while(i < this.state.contents.length){
+        var data = this.state.contents[i];
+        if(data.id === this.state.select_content_id){
+          return data;
+        }
+        i = i+1;
+      }
+  }
+
+  getContent(){
+    var _id, _title, _desc, _article = null;
     if(this.state.mode === 'welcome') {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
+      _article = <ReadContent title={_title} desc={_desc}></ReadContent>
     }else if(this.state.mode === 'read') {
-      _title = this.state.subject.title;
-      _desc = this.state.subject.desc;
-    }
+      var data = this.getReadContent();
 
+      _title = data.title;
+      _desc = data.desc;
+      _article = <ReadContent title={_title} desc={_desc}></ReadContent>
+      
+    }else if(this.state.mode === 'create'){
+      _article = <CreateContent 
+        onSubmit={function(_title,_desc){
+          this.max_content_id = this.max_content_id+1;
+          var newContent = Array.from(this.state.contents);
+          newContent.push(
+            {id:this.max_content_id, title:_title, desc:_desc}
+          );
+          this.setState({contents:newContent})
+        }.bind(this)} ></CreateContent>
+    }else if(this.state.mode === 'update'){
+      var _content = this.getReadContent();
+      _article = <UpdateContent 
+      onSubmit={function(){
+        
+      }.bind(this)} 
+      data={_content}></UpdateContent>
+    }
+    return _article;
+  }
+  
+  render() {
+    console.log('App render');
     return(
       <div className="App">
+          
           <Subject title={this.state.subject.title} desc={this.state.subject.desc} 
           onChangePage={function(){
-            if(this.state.mode === 'welcome'){
-              this.setState({mode : 'read'});
-            }else if(this.state.mode === 'read'){
+            if(this.state.mode === 'read'){
               this.setState({mode : 'welcome'});
             }
           }.bind(this)} ></Subject>
+          
           <TOC data={this.state.contents} 
-          onChangePage={function(){
-            alert("22");
-          }}></TOC>
-          <Content title={_title} desc={_desc}></Content>
+          onChangePage={function(id){
+            this.setState({
+              mode : 'read',
+              select_content_id : Number(id)
+            });
+          }.bind(this)} ></TOC>
+          <Control
+          onChangeMode={function(_mode){
+            this.setState({
+              mode : _mode
+            });
+          }.bind(this)}></Control>
+          {this.getContent()}
       </div>
     );
   }
